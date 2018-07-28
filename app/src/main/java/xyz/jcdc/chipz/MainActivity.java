@@ -1,7 +1,10 @@
 package xyz.jcdc.chipz;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -17,6 +20,12 @@ import android.view.MenuItem;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.onegravity.contactpicker.contact.Contact;
+import com.onegravity.contactpicker.contact.ContactDescription;
+import com.onegravity.contactpicker.contact.ContactSortOrder;
+import com.onegravity.contactpicker.core.ContactPickerActivity;
+import com.onegravity.contactpicker.group.Group;
+import com.onegravity.contactpicker.picture.ContactPictureType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +35,8 @@ import butterknife.ButterKnife;
 import xyz.jcdc.chipz.adapter.SelectedContactsAdapter;
 
 public class MainActivity extends AppCompatActivity implements SelectedContactsAdapter.SelectedContactClickedListener {
+
+    public static final int REQUEST_CONTACT = 666;
 
     private Context context;
 
@@ -39,10 +50,6 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
     RecyclerView recyclerView;
 
     private SelectedContactsAdapter selectedContactsAdapter;
-
-    private Integer[] last;
-
-    private List<String> contacts = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +70,6 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
             }
         });
 
-
-        contacts.add("John");
-        contacts.add("Paul");
-        contacts.add("Ringo");
-        contacts.add("George");
-
-
         selectedContactsAdapter = new SelectedContactsAdapter(this);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -78,20 +78,20 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
     }
 
     @Override
-    public void onContactClicked(final int position, final String who) {
+    public void onContactClicked(final int position, final Contact contact) {
         new MaterialDialog.Builder(this)
-                .title(who)
+                .title(contact.getDisplayName())
                 .items("Edit", "Remove")
                 .itemsCallback(new MaterialDialog.ListCallback() {
                     @Override
                     public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                         switch (which) {
                             case 0:
-                                showEditDialog(position, who);
+                                showEditDialog(position, contact);
                                 break;
 
                             case 1:
-                                removeContact(position, who);
+                                removeContact(position);
                                 break;
                         }
                     }
@@ -100,77 +100,45 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
 
     }
 
-    private void showEditDialog(final int position, final String who) {
+    private void showEditDialog(final int position, final Contact contact) {
         new MaterialDialog.Builder(this)
                 .title("Edit")
                 .inputType(InputType.TYPE_CLASS_TEXT )
-                .input(null, who, new MaterialDialog.InputCallback() {
+                .input(null, contact.getDisplayName(), new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(MaterialDialog dialog, CharSequence input) {
-                        selectedContactsAdapter.getContacts().set(position, input.toString());
+                        selectedContactsAdapter.getContacts().set(position, contact);
                         selectedContactsAdapter.notifyDataSetChanged();
                     }
                 }).show();
     }
 
-    private void removeContact(int position, final String who) {
-        last = null;
-
+    private void removeContact(int position) {
         selectedContactsAdapter.getContacts().remove(position);
         selectedContactsAdapter.notifyDataSetChanged();
     }
 
     private void showChooser() {
-
-        new MaterialDialog.Builder(this)
-                .title("Contacts")
-                .items(contacts)
-                .itemsCallbackMultiChoice(last, new MaterialDialog.ListCallbackMultiChoice() {
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
-                        return false;
-                    }
-                })
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        last = dialog.getSelectedIndices();
-
-                        selectedContactsAdapter.getContacts().clear();
-                        selectedContactsAdapter.notifyDataSetChanged();
-
-                        for (int i : dialog.getSelectedIndices()) {
-                            selectedContactsAdapter.getContacts().add(contacts.get(i));
-                        }
-
-                        selectedContactsAdapter.notifyDataSetChanged();
-                    }
-                })
-                .positiveText("Done")
-                .negativeText("Dismiss")
-                .show();
-
+        Intent intent = new Intent(this, ContactPickerActivity.class)
+                .putExtra(ContactPickerActivity.EXTRA_CONTACT_BADGE_TYPE, ContactPictureType.ROUND.name())
+                .putExtra(ContactPickerActivity.EXTRA_SHOW_CHECK_ALL, true)
+                .putExtra(ContactPickerActivity.EXTRA_CONTACT_DESCRIPTION, ContactDescription.ADDRESS.name())
+                .putExtra(ContactPickerActivity.EXTRA_CONTACT_DESCRIPTION_TYPE, ContactsContract.CommonDataKinds.Email.TYPE_WORK)
+                .putExtra(ContactPickerActivity.EXTRA_CONTACT_SORT_ORDER, ContactSortOrder.AUTOMATIC.name());
+        startActivityForResult(intent, REQUEST_CONTACT);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CONTACT && resultCode == Activity.RESULT_OK &&
+                data != null && data.hasExtra(ContactPickerActivity.RESULT_CONTACT_DATA)) {
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+            // we got a result from the contact picker
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+            // process contacts
+            List<Contact> contacts = (List<Contact>) data.getSerializableExtra(ContactPickerActivity.RESULT_CONTACT_DATA);
+            selectedContactsAdapter.setContacts(contacts);
+            selectedContactsAdapter.notifyDataSetChanged();
         }
-
-        return super.onOptionsItemSelected(item);
     }
 }

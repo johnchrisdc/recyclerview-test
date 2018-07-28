@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.onegravity.contactpicker.contact.Contact;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +22,7 @@ import xyz.jcdc.chipz.R;
 
 public class SelectedContactsAdapter extends RecyclerView.Adapter<SelectedContactsAdapter.ViewHolder>{
 
-    private List<String> contacts = new ArrayList<>();
+    private List<Contact> contacts = new ArrayList<>();
 
     private SelectedContactClickedListener selectedContactClickedListener;
 
@@ -60,9 +62,9 @@ public class SelectedContactsAdapter extends RecyclerView.Adapter<SelectedContac
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String contact = getContacts().get(position);
+        Contact contact = getContacts().get(position);
 
-        holder.button.setText(contact);
+        holder.button.setText(contact.getDisplayName());
     }
 
     @Override
@@ -70,16 +72,16 @@ public class SelectedContactsAdapter extends RecyclerView.Adapter<SelectedContac
         return getContacts().size();
     }
 
-    public List<String> getContacts() {
+    public List<Contact> getContacts() {
         return contacts;
     }
 
-    public void setContacts(List<String> contacts) {
+    public void setContacts(List<Contact> contacts) {
         this.contacts = contacts;
     }
 
     public interface SelectedContactClickedListener {
-        void onContactClicked(int position, String who);
+        void onContactClicked(int position, Contact contact);
     }
 
 }
