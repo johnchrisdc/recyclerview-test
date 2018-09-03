@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatRadioButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -33,6 +35,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import xyz.jcdc.chipz.adapter.SelectedContactsAdapter;
+import xyz.jcdc.chipz.model.Radio;
+import xyz.jcdc.chipz.model.RadioGroup;
 
 public class MainActivity extends AppCompatActivity implements SelectedContactsAdapter.SelectedContactClickedListener {
 
@@ -48,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+
+    @BindView(R.id.container_radios)
+    LinearLayout container_radios;
 
     private SelectedContactsAdapter selectedContactsAdapter;
 
@@ -75,6 +82,8 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(selectedContactsAdapter);
 
+
+        setUpRadio();
     }
 
     @Override
@@ -140,5 +149,34 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
             selectedContactsAdapter.setContacts(contacts);
             selectedContactsAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void setUpRadio() {
+        for (int x=0; x<50; x++) {
+            RadioGroup group = new RadioGroup();
+
+            Radio radio = new Radio("Sample 1", 1);
+            Radio radio2 = new Radio("Sample 2", 2);
+            Radio radio3 = new Radio("Sample 3", 3);
+
+            group.getRadios().add(radio);
+            group.getRadios().add(radio2);
+            group.getRadios().add(radio3);
+
+            android.widget.RadioGroup radioGroup = new android.widget.RadioGroup(context);
+            radioGroup.setOrientation(LinearLayout.HORIZONTAL);
+
+            for (Radio rad : group.getRadios()) {
+                AppCompatRadioButton appCompatRadioButton = new AppCompatRadioButton(context);
+                appCompatRadioButton.setText(rad.getName());
+                appCompatRadioButton.setId(rad.getId());
+
+                radioGroup.addView(appCompatRadioButton);
+            }
+
+            container_radios.addView(radioGroup);
+        }
+
+
     }
 }
