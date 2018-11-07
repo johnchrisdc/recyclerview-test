@@ -3,6 +3,7 @@ package xyz.jcdc.chipz;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -84,6 +85,16 @@ public class MainActivity extends AppCompatActivity implements SelectedContactsA
 
 
         setUpRadio();
+
+        String dataToPrint="$intro$$intro$$bigh$Hello World$intro$$intro$$intro$$intro$$intro$$intro$";
+
+        Intent intentPrint = new Intent();
+
+        intentPrint.setAction(Intent.ACTION_SEND);
+        intentPrint.putExtra(Intent.EXTRA_TEXT, dataToPrint);
+        intentPrint.setType("text/plain");
+
+        this.startActivity(intentPrint);
     }
 
     @Override
