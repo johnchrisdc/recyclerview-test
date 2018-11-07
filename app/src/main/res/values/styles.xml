@@ -15,6 +15,12 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Dark" />
+
+    <style name="Theme.AppTheme.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar" />
+
+    <style name="SuperLight" parent="Theme.AppCompat.Light.NoActionBar" />
+
+    <style name="SuperLight.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar" />
 
 </resources>

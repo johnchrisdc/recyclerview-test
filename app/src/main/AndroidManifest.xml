@@ -24,11 +24,21 @@
         <activity
             android:name="com.onegravity.contactpicker.core.ContactPickerActivity"
             android:enabled="true"
-            android:exported="false" >
-
+            android:exported="false">
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".SpinnerToolbar"
+            android:label="@string/title_activity_spinner_toolbar"
+            android:theme="@style/SuperLight">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>
